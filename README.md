@@ -48,13 +48,13 @@ docker compose up --build
 ## Tech stack
 
 - **Backend:** .NET 10 LTS, ASP.NET Core Minimal API, EF Core 10, SQLite
-- **Frontend:** React 18 + TypeScript 5.5+, Vite 5, React Router 6 — no state library, no UI framework, native `fetch` ([CLAUDE.md §2.12](CLAUDE.md))
+- **Frontend:** React 18 + TypeScript 5.5+, Vite 5, React Router 6 — no state library, no UI framework, native `fetch`
 - **LLM:** OpenAI .NET SDK 2.10 with **tiered model routing** —
   - `gpt-5.4-nano` for planner + classification (JSON ranking)
   - `gpt-5.4-mini` for vision-heavy extraction + email drafting
 - **Infra:** single multi-stage Docker container + named volume for SQLite + uploaded documents
 
-See [DESIGN.md](DESIGN.md) for the full specification and [CLAUDE.md](CLAUDE.md) for the decision rationale.
+See [DESIGN.md](DESIGN.md) for the full specification.
 
 ---
 
@@ -187,7 +187,7 @@ The architectural point: the routing is the senior signal, not the model brand. 
 - Streaming agent responses (SSE) — request/response is synchronous
 - Real means-test inputs — uses one month of bank deposits as proxy. Production wants a 6-month pay-stub look-back per 11 U.S.C. § 707(b)(2)
 - Real federal holiday calendar (hardcoded 2026)
-- Tests beyond the mandatory `MeansTestCalculator` unit tests (3 cases per CLAUDE.md §1.9)
+- Tests beyond the `MeansTestCalculator` unit tests (3 cases)
 - Per-firm policy configuration UI
 - Production database (uses SQLite)
 - **Real PDF vision in `OpenAiLlmProvider`** — text-only chat in this build; the PDF bytes are stored but **not sent to the LLM**. Production would rasterize via PdfPig + image content parts, or migrate to OpenAI's Files + Responses API. `LlmCompletionRequest.DocumentPath` is already wired into the request record for the future implementation.
@@ -201,7 +201,6 @@ The architectural point: the routing is the senior signal, not the model brand. 
 caseflow/
 ├── README.md            ← this file
 ├── DESIGN.md            ← build specification (the contracts)
-├── CLAUDE.md            ← build behavior + decision rationale
 ├── Dockerfile           ← multi-stage build (node → SDK → aspnet)
 ├── docker-compose.yml   ← single service, named volume at /data
 ├── .env.example         ← env var contract
@@ -253,8 +252,6 @@ cd tests/Caseflow.Tests && dotnet test
 ---
 
 ## Decisions: the short version
-
-See **[CLAUDE.md](CLAUDE.md)** for the long-form rationale on each.
 
 - **Agentic, not form-driven.** Glade's product is workflow automation — the agent realizes "scale your practice, not your team."
 - **Constrained agent pattern.** State machine + per-tool policy constrain what an LLM can choose. Defensible in legal AI specifically.

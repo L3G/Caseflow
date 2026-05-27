@@ -83,7 +83,6 @@ caseflow/
 ├── .env.example
 ├── README.md
 ├── DESIGN.md                    (this file)
-├── CLAUDE.md                    (build behavior for Claude Code)
 │
 ├── backend/
 │   ├── Caseflow.csproj
@@ -624,5 +623,4 @@ The build is "done" when ALL of these are true:
 ---
 
 *End of design specification. If anything in this document conflicts with
-CLAUDE.md, this document wins. If anything in either conflicts with how
-the code should actually work, ask before deviating.*
+how the code should actually work, ask before deviating.*
