@@ -1,0 +1,41 @@
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docs and meta (not needed inside the image)
+*.md
+
+# .NET build outputs — rebuilt inside the SDK stage
+**/bin/
+**/obj/
+
+# Node build outputs — rebuilt inside the node stage
+**/node_modules/
+**/dist/
+**/.vite/
+
+# Environment files — runtime env comes from docker-compose, not bundled
+.env
+.env.local
+.env.example
+
+# Local data volume contents
+/data/
+
+# Sample fixtures — reviewer uploads from host, not bundled
+samples/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vs/
+.idea/
+.vscode/
+
+# Docker files — already known to the daemon
+Dockerfile
+docker-compose.yml
+.dockerignore

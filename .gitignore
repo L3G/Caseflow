@@ -1,0 +1,34 @@
+# .NET build outputs
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# Node build outputs
+node_modules/
+dist/
+.vite/
+
+# SQLite databases (recreated on boot via EnsureCreated)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Uploaded documents (dev only; in Docker these live on the /data volume)
+documents/
+
+# Environment and secrets
+.env
+.env.local
+
+# Data volume — mirrors Docker mount path in DESIGN §11
+/data/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
