@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using Caseflow.Agent;
 using Caseflow.Data;
 using Caseflow.Services;
+using Caseflow.Services.Llm;
 using Caseflow.Tools;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,6 +40,18 @@ builder.Services.AddScoped<IPolicy, ConfigPolicy>();
 builder.Services.AddScoped<ToolRegistry>();
 
 builder.Services.AddScoped<AgentOrchestrator>();
+
+builder.Services.AddScoped<ITool, FlagForAttorneyReviewTool>();
+builder.Services.AddScoped<ITool, RequestAttorneyApprovalTool>();
+builder.Services.AddScoped<ITool, ExtractPayStubTool>();
+builder.Services.AddScoped<ITool, ComputeMeansTestTool>();
+builder.Services.AddScoped<ITool, CalculateDeadlinesTool>();
+builder.Services.AddScoped<ITool, CheckArithmeticIntegrityTool>();
+
+builder.Services.AddScoped<ILlmProvider, MockLlmProvider>();
+builder.Services.AddScoped<ITool, ClassifyDocumentTool>();
+builder.Services.AddScoped<ITool, ExtractBankStatementTool>();
+builder.Services.AddScoped<ITool, DraftClientEmailTool>();
 
 var app = builder.Build();
 
