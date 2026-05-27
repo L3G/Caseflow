@@ -1,0 +1,27 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: caseflow:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - caseflow-data:/data
+    environment:
+      # Production overrides for storage paths — land on the named volume.
+      ConnectionStrings__Caseflow: "Data Source=/data/caseflow.db"
+      Storage__DocumentsPath: "/data/documents"
+      # Env passthrough from .env with sensible defaults.
+      # Program.cs bridges these user-friendly names into ASP.NET config keys.
+      LLM_PROVIDER: "${LLM_PROVIDER:-Mock}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      LLM_MODEL_NANO: "${LLM_MODEL_NANO:-gpt-5.4-nano}"
+      LLM_MODEL_MINI: "${LLM_MODEL_MINI:-gpt-5.4-mini}"
+      LLM_CONFIDENCE_THRESHOLD: "${LLM_CONFIDENCE_THRESHOLD:-0.70}"
+      AGENT_MAX_STEPS: "${AGENT_MAX_STEPS:-8}"
+      AGENT_MAX_DURATION_SECONDS: "${AGENT_MAX_DURATION_SECONDS:-25}"
+    restart: unless-stopped
+
+volumes:
+  caseflow-data:

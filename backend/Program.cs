@@ -11,16 +11,25 @@ using Caseflow.Tools;
 var builder = WebApplication.CreateBuilder(args);
 
 // Bridge user-friendly env var names from DESIGN §11 into ASP.NET Core config.
-// Lets the user `export OPENAI_API_KEY=sk-...` instead of `Llm__ApiKey=...`.
-var openAiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
-if (!string.IsNullOrWhiteSpace(openAiKey))
+// Lets the user export `OPENAI_API_KEY=...` etc. without the ASP.NET `__` convention.
+// Works identically in local dev, Docker, and CI.
+var envBridge = new Dictionary<string, string>
 {
-    builder.Configuration["Llm:ApiKey"] = openAiKey;
-}
-var llmProvider = Environment.GetEnvironmentVariable("LLM_PROVIDER");
-if (!string.IsNullOrWhiteSpace(llmProvider))
+    ["OPENAI_API_KEY"]            = "Llm:ApiKey",
+    ["LLM_PROVIDER"]              = "Llm:Provider",
+    ["LLM_MODEL_NANO"]            = "Llm:Model:Nano",
+    ["LLM_MODEL_MINI"]            = "Llm:Model:Mini",
+    ["LLM_CONFIDENCE_THRESHOLD"]  = "Llm:ConfidenceThreshold",
+    ["AGENT_MAX_STEPS"]           = "Agent:MaxStepsPerRun",
+    ["AGENT_MAX_DURATION_SECONDS"]= "Agent:MaxRunDurationSeconds",
+};
+foreach (var (envName, configKey) in envBridge)
 {
-    builder.Configuration["Llm:Provider"] = llmProvider;
+    var value = Environment.GetEnvironmentVariable(envName);
+    if (!string.IsNullOrWhiteSpace(value))
+    {
+        builder.Configuration[configKey] = value;
+    }
 }
 
 builder.Services.ConfigureHttpJsonOptions(options =>
