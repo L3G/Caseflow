@@ -1,7 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Caseflow.Agent;
 using Caseflow.Data;
+using Caseflow.Services;
+using Caseflow.Tools;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +29,16 @@ builder.Services.AddCors(options =>
         .AllowAnyHeader()
         .AllowAnyMethod());
 });
+
+builder.Services.AddScoped<IDocumentStore, DocumentStore>();
+builder.Services.AddScoped<IAuditLog, AuditLog>();
+builder.Services.AddScoped<ICaseStore, CaseStore>();
+
+builder.Services.AddScoped<IPlanner, MockPlanner>();
+builder.Services.AddScoped<IPolicy, ConfigPolicy>();
+builder.Services.AddScoped<ToolRegistry>();
+
+builder.Services.AddScoped<AgentOrchestrator>();
 
 var app = builder.Build();
 

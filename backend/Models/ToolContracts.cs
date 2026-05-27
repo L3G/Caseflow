@@ -24,7 +24,10 @@ public enum ToolPolicyDecision
 public sealed record ToolPersistenceHint(
     ToolPersistenceKind Kind,
     string PayloadJson,
-    string? DocumentId
+    string? DocumentId = null,
+    ExtractionType? ExtractionType = null,
+    AnalysisType? AnalysisType = null,
+    DocumentType? DocumentType = null
 );
 
 public enum ToolPersistenceKind
