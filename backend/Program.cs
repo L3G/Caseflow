@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Caseflow.Agent;
 using Caseflow.Data;
+using Caseflow.Endpoints;
 using Caseflow.Services;
 using Caseflow.Services.Llm;
 using Caseflow.Tools;
@@ -65,8 +66,8 @@ app.UseCors();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
-app.MapGet("/api/cases", async (AppDbContext db) =>
-    await db.Cases.OrderByDescending(c => c.CreatedAt).ToListAsync());
+app.MapCasesEndpoints();
+app.MapApprovalsEndpoints();
 
 app.MapFallbackToFile("index.html");
 
