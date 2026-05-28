@@ -4,7 +4,7 @@
 
 ![Cases list — workflow table](screenshots/01-cases-list.png)
 
-Take-home submission for **Glade.AI**, demonstrating an **agentic AI workflow for Chapter 7 bankruptcy intake**.
+T**Agentic AI workflow for Chapter 7 bankruptcy intake**.
 
 ---
 
