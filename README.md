@@ -4,7 +4,7 @@
 
 ![Cases list — workflow table](screenshots/01-cases-list.png)
 
-T**Agentic AI workflow for Chapter 7 bankruptcy intake**.
+**Agentic AI workflow for Chapter 7 bankruptcy intake**.
 
 ---
 
