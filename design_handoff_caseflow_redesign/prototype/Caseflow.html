@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Caseflow · redesign</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Fonts: Plus Jakarta Sans (geometric) + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" />
+
+  <!-- React + Babel (pinned) -->
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <style>
+    html, body, #root { height:100%; margin:0; padding:0; }
+    body { background:#0B0C10; color:#F4F5F7; font-family:'Plus Jakarta Sans','Inter Tight','Inter',ui-sans-serif,system-ui,sans-serif; }
+    * { box-sizing:border-box; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="shared-data.jsx"></script>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="aurora.jsx"></script>
+
+  <script type="text/babel">
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "accent": "aurora",
+      "dark": false,
+      "confidenceStyle": "bar"
+    }/*EDITMODE-END*/;
+
+    function App() {
+      const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+      const W = 1440, H = 900;
+      return (
+        <div style={{height:'100%', background:'#0B0C10'}}>
+          <DesignCanvas title="Caseflow" subtitle="Refreshed direction · vibrant gradient brand · soft tinted status pills · icon-rail nav">
+
+            <DCSection id="screens" title="Screens" subtitle="Three core screens, each clickable. Click a row to drill in, the brand mark or breadcrumb to return, + Initiate case to open the sheet.">
+              <DCArtboard id="list" label="Cases — list" width={W} height={H}>
+                <AuroraApp accent={tweaks.accent} dark={tweaks.dark} confidenceStyle={tweaks.confidenceStyle} initialScreen="list" />
+              </DCArtboard>
+
+              <DCArtboard id="detail" label="Case detail — Jordan A. Park" width={W} height={H}>
+                <AuroraApp accent={tweaks.accent} dark={tweaks.dark} confidenceStyle={tweaks.confidenceStyle} initialScreen="detail" />
+              </DCArtboard>
+
+              <DCArtboard id="initiate" label="Initiate case — sheet" width={W} height={H}>
+                <AuroraApp accent={tweaks.accent} dark={tweaks.dark} confidenceStyle={tweaks.confidenceStyle} initialScreen="initiate" />
+              </DCArtboard>
+            </DCSection>
+
+          </DesignCanvas>
+
+          <TweaksPanel title="Tweaks">
+            <TweakSection label="Brand gradient" />
+            <TweakColor
+              label="Palette"
+              value={
+                tweaks.accent === 'aurora' ? ['#8B5CF6','#EC4899','#F97316']
+              : tweaks.accent === 'ocean'  ? ['#0EA5E9','#6366F1','#A855F7']
+              : tweaks.accent === 'citrus' ? ['#F59E0B','#F97316','#EF4444']
+              :                              ['#10B981','#0EA5E9','#8B5CF6']
+              }
+              options={[
+                ['#8B5CF6','#EC4899','#F97316'],
+                ['#0EA5E9','#6366F1','#A855F7'],
+                ['#F59E0B','#F97316','#EF4444'],
+                ['#10B981','#0EA5E9','#8B5CF6'],
+              ]}
+              onChange={(p) => {
+                const first = Array.isArray(p) ? p[0] : p;
+                const key = first === '#8B5CF6' ? 'aurora'
+                          : first === '#0EA5E9' ? 'ocean'
+                          : first === '#F59E0B' ? 'citrus'
+                          :                       'forest';
+                setTweak('accent', key);
+              }}
+            />
+
+            <TweakSection label="Appearance" />
+            <TweakToggle label="Dark mode" value={tweaks.dark} onChange={v => setTweak('dark', v)} />
+
+            <TweakSection label="Confidence display" />
+            <TweakRadio
+              label="Style"
+              value={tweaks.confidenceStyle}
+              options={['bar', 'chip', 'dots']}
+              onChange={v => setTweak('confidenceStyle', v)}
+            />
+          </TweaksPanel>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    function mount() {
+      if (window.AuroraApp && window.DesignCanvas && window.TweaksPanel && window.CASEFLOW_CASES) {
+        root.render(<App />);
+      } else {
+        setTimeout(mount, 30);
+      }
+    }
+    mount();
+  </script>
+</body>
+</html>
