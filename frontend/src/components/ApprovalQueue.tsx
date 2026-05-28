@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Check, X } from 'lucide-react';
 import type { ApprovalDecision, PendingApproval } from '../types';
 
 interface Props {
@@ -8,25 +9,25 @@ interface Props {
 
 export function ApprovalQueue({ approvals, onResolve }: Props) {
   if (approvals.length === 0) {
-    return <p className="cf-text-muted">No approvals on this case yet.</p>;
+    return <p style={{ color: 'var(--muted)', fontSize: 13 }}>No approvals on this case yet.</p>;
   }
 
   const pending = approvals.filter((a) => a.resolvedAt === null);
   const resolved = approvals.filter((a) => a.resolvedAt !== null);
 
   return (
-    <div className="cf-approvals">
+    <>
       {pending.map((a) => (
-        <PendingItem key={a.id} approval={a} onResolve={onResolve} />
+        <PendingRow key={a.id} approval={a} onResolve={onResolve} />
       ))}
       {resolved.map((a) => (
-        <ResolvedItem key={a.id} approval={a} />
+        <ResolvedRow key={a.id} approval={a} />
       ))}
-    </div>
+    </>
   );
 }
 
-function PendingItem({
+function PendingRow({
   approval,
   onResolve,
 }: {
@@ -34,49 +35,96 @@ function PendingItem({
   onResolve: Props['onResolve'];
 }) {
   const [notes, setNotes] = useState('');
+  const [expanded, setExpanded] = useState(true);
+
   return (
-    <div className="cf-approval cf-approval--pending">
-      <div className="cf-approval-head">
-        <strong>{approval.toolName}</strong>
-        <span className="cf-text-faint">{formatTime(approval.requestedAt)}</span>
-      </div>
-      <p className="cf-approval-reason">{approval.plannerReasoning}</p>
-      <textarea
-        className="cf-approval-notes"
-        placeholder="Notes (optional)…"
-        value={notes}
-        onChange={(e) => setNotes(e.target.value)}
-      />
-      <div className="cf-approval-actions">
+    <div className="au-appr" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <div>
+          <div className="au-appr-name">{approval.toolName}</div>
+          <div className="au-appr-meta">requested · {formatTime(approval.requestedAt)}</div>
+        </div>
         <button
-          className="cf-btn cf-btn--primary"
-          onClick={() => onResolve(approval.id, 'approve', notes || undefined)}
+          type="button"
+          onClick={() => setExpanded((e) => !e)}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'var(--muted)',
+            fontSize: 11,
+            cursor: 'pointer',
+            fontWeight: 600,
+          }}
         >
-          Approve
-        </button>
-        <button
-          className="cf-btn cf-btn--ghost-danger"
-          onClick={() => onResolve(approval.id, 'reject', notes || undefined)}
-        >
-          Reject
+          {expanded ? 'Collapse' : 'Expand'}
         </button>
       </div>
+      {expanded && (
+        <>
+          <div
+            style={{
+              fontSize: 13,
+              color: 'var(--ink-2)',
+              marginTop: 6,
+              padding: '8px 10px',
+              background: 'var(--surface-2)',
+              borderRadius: 8,
+              border: '1px solid var(--line)',
+              borderLeft: '3px solid var(--warn)',
+            }}
+          >
+            {approval.plannerReasoning}
+          </div>
+          <textarea
+            className="au-appr-notes"
+            placeholder="Notes (optional)…"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+          <div className="au-appr-actions" style={{ marginTop: 4 }}>
+            <button
+              type="button"
+              className="au-btn au-btn-ink au-btn-sm"
+              onClick={() => onResolve(approval.id, 'approve', notes || undefined)}
+            >
+              <Check size={12} strokeWidth={3} /> Approve
+            </button>
+            <button
+              type="button"
+              className="au-btn au-btn-sm"
+              onClick={() => onResolve(approval.id, 'reject', notes || undefined)}
+            >
+              <X size={12} /> Reject
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
-function ResolvedItem({ approval }: { approval: PendingApproval }) {
+function ResolvedRow({ approval }: { approval: PendingApproval }) {
+  const pillCls =
+    approval.decision === 'approve' ? 'au-pill-approved' : 'au-pill-needs';
+  const icon =
+    approval.decision === 'approve' ? <Check size={12} strokeWidth={3} /> : <X size={12} />;
+  const label = approval.decision === 'approve' ? 'Approved' : 'Rejected';
+
   return (
-    <div
-      className={`cf-approval cf-approval--resolved cf-approval--${approval.decision ?? 'resolved'}`}
-    >
-      <div className="cf-approval-head">
-        <strong>{approval.toolName}</strong>
-        <span className="cf-text-faint">
-          {approval.decision} · {approval.resolvedBy}
+    <div className="au-appr">
+      <div>
+        <div className="au-appr-name">{approval.toolName}</div>
+        <div className="au-appr-meta">{approval.decision} · human</div>
+      </div>
+      <div className="au-appr-r">
+        <span className={`au-pill ${pillCls}`}>
+          <span className="ic">{icon}</span>
+          {label}
+        </span>
+        <span className="au-appr-by aur-mono">
+          by {approval.resolvedBy ?? '—'} · {approval.resolvedAt ? formatTime(approval.resolvedAt) : ''}
         </span>
       </div>
-      {approval.notes && <p className="cf-approval-reason">"{approval.notes}"</p>}
     </div>
   );
 }
