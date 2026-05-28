@@ -2,7 +2,7 @@
 
 > Upload one document. The system runs the case forward through a Chapter 7 intake workflow as far as it safely can — and stops to ask the human when it can't. Every AI decision is logged in an audit trail.
 
-![Cases list — workflow table](screenshots/01-cases-list.png)
+![Caseflow cases list — every agent outcome path visible at a glance](screenshots/01-cases-list.png)
 
 **Agentic AI workflow for Chapter 7 bankruptcy intake**.
 
@@ -26,6 +26,24 @@ cp .env.example .env
 docker compose up --build
 ```
 
+### Sample documents
+
+Five test PDFs are included in [`test-documents/`](test-documents/) so you can exercise every path through the agent without generating your own:
+
+| File | What it tests |
+|---|---|
+| `first_national_bank_statement_april_2026.pdf` | Happy path — reconciles, means test passes |
+| `sierra_pacific_statement_march_2026.pdf` | Happy-path variant (different client / bank) |
+| `atlas_national_statement_feb_2026.pdf` | Means test **fails** — $102K annualized > $76K threshold |
+| `heartland_federal_statement_jan_2026.pdf` | Reconciliation **mismatch** — printed ending balance off by $200 |
+| `greenleaf_paystub_feb_2026.pdf` | **Wrong document type** — pay stub, not bank statement |
+
+Reset state between tests:
+
+```bash
+docker compose down -v && docker compose up -d
+```
+
 ---
 
 ## What the demo shows
@@ -41,7 +59,32 @@ docker compose up --build
    - **Approval queue** at the mandatory attorney checkpoint
 4. **Approval** → case transitions to `approved`
 
-![Workspace with staggered activity feed](screenshots/02-workspace-running.png)
+![Initiate case modal — workflow tiles and PDF upload](screenshots/02-initiate-modal.png)
+
+![Case workspace mid-run — planner reasoning, tool execution, audit trail](screenshots/03-workspace-happy-path.png)
+
+![Case workspace scrolled — extracted transactions, means test, deadlines, arithmetic check](screenshots/04-workspace-analyses.png)
+
+---
+
+## Four paths through the agent
+
+The architecture distinguishes **workflow state** (what does this case need next?) from **outcome data** (why?). Both surface in the UI, in different elements, different languages — the status pill carries one signal, red outcome chips carry the other.
+
+| Path | Status pill | Outcome chip |
+|---|---|---|
+| **Happy path** | `Awaiting attorney` (yellow) → `Completed` (green) after approval | — |
+| **Means test fails** | `Awaiting attorney` (yellow) — case still advances | `Means test: Fails` (red) |
+| **Reconciliation mismatch** | `Needs documents` (red) — case held by `CheckArithmeticIntegrity` | `Arithmetic: Mismatch` (red) |
+| **Wrong document type** | `Needs documents` (red) — case held after classification | `Wrong type: <DocumentType>` (red) |
+
+The means test "failing" isn't an error — the architecture passes it through as data so the attorney can decide. The arithmetic mismatch *is* an error — the system caught a discrepancy and stopped. Same hero row, two different signals.
+
+![Means test fails — outcome chip in the hero meta row](screenshots/05-means-test-fails.png)
+
+When the arithmetic check fails, the Analyses panel expands to show exactly which numbers don't add up — beginning + deposits − withdrawals vs. the printed ending balance:
+
+![Arithmetic mismatch — math breakdown in the Analyses card](screenshots/06-arithmetic-mismatch.png)
 
 ---
 
@@ -224,7 +267,8 @@ caseflow/
 │
 ├── tests/Caseflow.Tests/  ← xUnit; MeansTestCalculator unit tests (3 cases)
 │
-└── screenshots/         ← 3 demo screenshots
+├── screenshots/        ← 7 demo screenshots covering each agent outcome path
+└── test-documents/     ← 5 sample PDFs (happy path × 2, means-test fail, arithmetic mismatch, wrong type)
 ```
 
 ---
@@ -262,8 +306,6 @@ cd tests/Caseflow.Tests && dotnet test
 - **Append-only audit log enforced at the DbContext level.** Service-layer guards can be bypassed; the `SaveChanges` wall cannot.
 - **Mock-first development.** Every LLM-backed interface has a Mock with deterministic fixtures. Demo runs offline; tests don't touch the network; dev iteration costs $0.
 - **Strategy pattern.** Flip `LLM_PROVIDER=OpenAI` to swap from Mock to real — same demo, same code path. Last-registered DI wins.
-
-![Approved case + audit trail](screenshots/03-approved.png)
 
 ---
 
